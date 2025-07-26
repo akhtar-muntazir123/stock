@@ -16,15 +16,10 @@ export default function App() {
         <Stack.Screen name="StockCount" component={StockCountScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-
-
   );
 }
 
 const styles = StyleSheet.create({
-  // <View style={styles.container}>
-  //   <Text>Hello</Text>
-  // </View>
   container: {
     flex: 1,
     backgroundColor: '#fff',

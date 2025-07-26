@@ -6,7 +6,9 @@ const { height: screenHeight } = Dimensions.get('window');
 const ninetyVH = screenHeight * 0.9;
 
 export default function StockCountScreen({ route,navigation }) {
-  const { project, warehouse } = route.params;
+  const { selectedProject,selectedWarehouse} = route.params;
+  const project=selectedProject
+  const warehouse=selectedWarehouse
   const [barcode, setBarcode] = useState('');
   const [count, setCount] = useState('');
 
@@ -84,7 +86,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   headerRow: {
-    flexDirection: 'row',
+    flex:'flex-wrap',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     backgroundColor: 'white',
     paddingHorizontal: 20,
