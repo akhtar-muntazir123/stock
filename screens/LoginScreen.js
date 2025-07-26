@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import axios from "axios"
 
 export default function LoginScreen({ navigation }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = () => {
-        if (username.trim() && password == 'Hello@123') {
+    const handleLogin = async () => {
+        try {
+            const response =await axios.post("http://192.168.29.183:1433/api/v1/user/login",
+                {
+                    userName: username,
+                    password: password
+                }
+            )
+            const userId= response.data.data.userId
+            console.log("Login successful",userId)
+            localStorage.setItem("user",userId)
             navigation.navigate('Project');
         }
-        else {
-            Alert.alert("not a valid user")
+        catch (err) {
+            console.log("error connecting to the server",err)
+            Alert.alert("Invalid credentials")
         }
-    };
+
+    }
+
 
     return (
         <View style={styles.container}>

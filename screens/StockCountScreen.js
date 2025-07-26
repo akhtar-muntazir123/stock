@@ -1,72 +1,62 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions,TouchableOpacity } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions } from 'react-native';
+import axios from 'axios';
 
 const { height: screenHeight } = Dimensions.get('window');
 const ninetyVH = screenHeight * 0.9;
 
 export default function StockCountScreen({ route }) {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState('');
-  const cameraRef = useRef(null);
   const { project, warehouse } = route.params;
   const [barcode, setBarcode] = useState('');
   const [count, setCount] = useState('');
 
-  const handleOk = () => {
-    Alert.alert('Entry Saved', `Barcode: ${barcode}, Count: ${count}`);
-    console.log(barcode)
-    setBarcode('');
-    setCount('');
-    console.log('Entry Saved', `Barcode: ${barcode}, Count: ${count}`)
+
+  const handleOk = async () => {
+    try {
+
+      Alert.alert('Entry Saved', `Barcode: ${barcode}, Count: ${count}`);
+      //get user from localstorage
+      const userId= localStorage.getItem("user")
+      console.log(userId)
+      // sending a post request
+      const res = await axios.post(`http://192.168.29.183:1433/api/v1/stockCount/addStockCount/${project}/${warehouse}`, {
+        productId: barcode,//barcode id
+        count: count,
+        countedBy: userId//user Id
+      })
+      console.log("res", res.data.message)
+      console.log('Entry Saved', `Barcode: ${barcode}, Count: ${count}`);
+      setBarcode('');
+      setCount('');
+    } catch (error) {
+      console.log("error saving data", error)
+    }
+
   };
 
   const handleFinish = () => {
     Alert.alert('Finished', `Project: ${project}, Warehouse: ${warehouse}`);
+    localStorage.removeItem("user")
+    navigation.navigate('Login');
   };
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    setScannedData(data);
-    setBarcode(data);
-    alert(`Scanned: ${data}`);
-  };
-
-  if (!permission) return <Text>Requesting camera permission...</Text>;
-  if (!permission.granted)
-    return (
-      <View>
-        <Text>No access to camera</Text>
-        <Button title="Grant Permission" onPress={requestPermission} />
-      </View>
-    );
 
   return (
     <View style={[styles.container, { height: ninetyVH }]}>
-      <View style={{display:"flex",flexDirection:"row", backgroundColor:"white"}}>
+      <View style={styles.headerRow}>
         <Text style={styles.header}>Project: {project}</Text>
         <Text style={styles.header}>Warehouse: {warehouse}</Text>
       </View>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr', 'ean13', 'code128', 'upc_a'],
-        }}
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-      />
-      
+
       <View style={styles.inputContainer}>
-         <TextInput
-        placeholder="Enter Barcode"
-        value={barcode}
-        onChangeText={setBarcode}
-        style={styles.input}
-      />
-      {scanned && (
-        <Button title="Scan Again" onPress={() => setScanned(false)} />
-      )}
+        <Text style={styles.label}>Barcode</Text>
+        <TextInput
+          placeholder="Enter Barcode"
+          value={barcode}
+          onChangeText={setBarcode}
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Count</Text>
         <TextInput
           placeholder="Enter Count"
           value={count}
@@ -74,8 +64,12 @@ export default function StockCountScreen({ route }) {
           style={styles.input}
           keyboardType="numeric"
         />
-        <Button title="OK" onPress={handleOk} disabled={!barcode || !count} />
-        <View style={{ marginTop: 10 }}>
+
+        <View style={{ marginTop: 15, width: 80 }}>
+          <Button title="OK" onPress={handleOk} disabled={!barcode || !count} />
+        </View>
+
+        <View style={{ marginTop: 20 }}>
           <Button title="Finish" onPress={handleFinish} />
         </View>
       </View>
@@ -89,18 +83,30 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'flex-start',
   },
-  camera: {
-    height: '45%', // You can adjust this portion
-    width: '100%',
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  header: {
+    fontWeight: '600',
+    fontSize: 16,
+    marginBottom: 10,
   },
   inputContainer: {
     padding: 10,
   },
-  header: { fontWeight: 'semiBold', fontSize: 16, marginBottom: 10,marginTop:10 ,paddingLeft:20},
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 10,
+    marginBottom: 4,
+  },
   input: {
     borderWidth: 1,
     padding: 10,
-    marginVertical: 10,
     borderRadius: 5,
   },
 });
