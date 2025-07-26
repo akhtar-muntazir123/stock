@@ -5,7 +5,7 @@ import axios from 'axios';
 const { height: screenHeight } = Dimensions.get('window');
 const ninetyVH = screenHeight * 0.9;
 
-export default function StockCountScreen({ route }) {
+export default function StockCountScreen({ route,navigation }) {
   const { project, warehouse } = route.params;
   const [barcode, setBarcode] = useState('');
   const [count, setCount] = useState('');
@@ -16,13 +16,13 @@ export default function StockCountScreen({ route }) {
 
       Alert.alert('Entry Saved', `Barcode: ${barcode}, Count: ${count}`);
       //get user from localstorage
-      const userId= localStorage.getItem("user")
-      console.log(userId)
+      // const userId= localStorage.getItem("user")
+      // console.log(userId)
       // sending a post request
       const res = await axios.post(`http://192.168.29.183:1433/api/v1/stockCount/addStockCount/${project}/${warehouse}`, {
         productId: barcode,//barcode id
         count: count,
-        countedBy: userId//user Id
+        countedBy: "U001"//user Id
       })
       console.log("res", res.data.message)
       console.log('Entry Saved', `Barcode: ${barcode}, Count: ${count}`);
@@ -36,7 +36,7 @@ export default function StockCountScreen({ route }) {
 
   const handleFinish = () => {
     Alert.alert('Finished', `Project: ${project}, Warehouse: ${warehouse}`);
-    localStorage.removeItem("user")
+    // localStorage.removeItem("user")
     navigation.navigate('Login');
   };
 

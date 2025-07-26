@@ -8,19 +8,18 @@ export default function LoginScreen({ navigation }) {
 
     const handleLogin = async () => {
         try {
-            const response =await axios.post("http://192.168.29.183:1433/api/v1/user/login",
+            const response = await axios.post("http://192.168.29.183:1433/api/v1/user/login",
                 {
                     userName: username,
                     password: password
                 }
             )
-            const userId= response.data.data.userId
-            console.log("Login successful",userId)
-            localStorage.setItem("user",userId)
+            const userId = response.data.data.userId
+            console.log("Login successful", userId)
             navigation.navigate('Project');
         }
         catch (err) {
-            console.log("error connecting to the server",err)
+            console.log("error connecting to the server", err)
             Alert.alert("Invalid credentials")
         }
 
